@@ -1,0 +1,72 @@
+Sub CopyAndMerge()
+
+    Dim sheet As Worksheet
+    Dim lastNumber As Long
+    Dim rngSource As Range
+    Dim rngTarget As Range
+    Dim cell As Range
+    Dim merges As Collection
+    Dim merge As Range
+    Dim i As Long
+    Dim j As Long
+    
+    ' 사용자에게 마지막 행 번호를 입력하게 합니다.
+    lastNumber = InputBox("Enter the last number you want to copy rows to.")
+    
+    ' 사용자에게 복사할 셀 범위를 입력하게 합니다.
+    Dim sourceAddress As String
+    sourceAddress = InputBox("Enter the source range (e.g., 'A2:E7').")
+    
+    ' 워크시트 설정
+    Set sheet = ActiveSheet
+    
+    ' 원본 범위 설정
+    Set rngSource = sheet.Range(sourceAddress)
+    
+    ' 원본 범위에서 병합된 셀들의 정보를 가져옵니다.
+    Set merges = New Collection
+    For Each cell In rngSource
+        If cell.MergeCells And Not IsInCollection(cell.MergeArea.Address, merges) Then
+            merges.Add cell.MergeArea
+        End If
+    Next cell
+    
+    ' 복사 및 붙여넣기를 반복합니다.
+    For i = 1 To lastNumber
+        
+        ' 복사할 대상 셀 범위를 설정합니다.
+        Set rngTarget = sheet.Range(sheet.Cells((i - 1) * rngSource.Rows.Count + rngSource.Row, 1), sheet.Cells((i - 1) * rngSource.Rows.Count + rngSource.Rows.Count, rngSource.Columns.Count))
+        
+        ' 원본 범위를 복사하여 대상 범위에 붙여넣습니다.
+        rngSource.Copy
+        rngTarget.PasteSpecial Paste:=xlPasteAllUsingSourceTheme
+        
+        ' 복사된 범위에서 각 행의 높이를 원본 범위의 해당 행 높이와 일치하게 설정합니다.
+        For j = 1 To rngSource.Rows.Count
+            rngTarget.Rows(j).RowHeight = rngSource.Rows(j).RowHeight
+        Next j
+        
+        ' 병합된 셀들을 다시 병합합니다.
+        For Each merge In merges
+            With merge.Offset((i - 1) * rngSource.Rows.Count, 0)
+                .merge
+            End With
+        Next merge
+    Next i
+    
+    Application.CutCopyMode = False ' 클립보드를 지웁니다.
+    
+End Sub
+
+Function IsInCollection(val As Variant, col As Collection) As Boolean
+    Dim element As Variant
+    On Error Resume Next
+    For Each element In col
+        If element.Address = val Then
+            IsInCollection = True
+            Exit Function
+        End If
+    Next element
+    IsInCollection = False
+End Function
+

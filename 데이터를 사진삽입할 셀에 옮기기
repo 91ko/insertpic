@@ -1,0 +1,53 @@
+Sub CopyPaste()
+
+    Dim ws As Worksheet
+    Dim rngCopy As Range, rngPaste As Range
+    Dim intStepCopy As Integer, intStepPaste As Integer
+    Dim strAddress As String
+    Dim varValues As Variant
+
+    ' 사용자로부터 셀 선택
+    On Error Resume Next
+    Set rngCopy = Application.InputBox("복사를 시작할 셀을 선택하세요.", Type:=8)
+    If rngCopy Is Nothing Then Exit Sub
+    On Error GoTo 0
+
+    intStepCopy = Application.InputBox("복사할 데이터의 간격을 입력하세요. (예: 7)", Type:=1)
+    If intStepCopy = False Then Exit Sub
+
+    On Error Resume Next
+    Set rngPaste = Application.InputBox("붙여넣기를 시작할 셀을 선택하세요.", Type:=8)
+    If rngPaste Is Nothing Then Exit Sub
+    On Error GoTo 0
+
+    intStepPaste = Application.InputBox("붙여넣을 데이터의 간격을 입력하세요. (예: 7)", Type:=1)
+    If intStepPaste = False Then Exit Sub
+
+    ' 워크시트 설정
+    Set ws = ActiveSheet
+
+    ' 원본 셀에서 데이터가 없을 때까지 반복
+    Do While Not IsEmpty(rngCopy)
+    
+        ' 병합 셀에서 데이터 복사
+        varValues = rngCopy.MergeArea.Value
+    
+        ' 병합된 범위 주소 저장
+        strAddress = rngPaste.MergeArea.Address
+    
+        ' 병합 해제 및 붙여넣기
+        With ws
+            .Range(strAddress).UnMerge
+            .Range(strAddress).Resize(UBound(varValues, 1), UBound(varValues, 2)).NumberFormat = "@" ' Change the cell format to text
+            .Range(strAddress).Resize(UBound(varValues, 1), UBound(varValues, 2)).Value = varValues
+            .Range(strAddress).Merge
+        End With
+
+        ' 다음 복사 및 붙여넣기 위치로 이동
+        Set rngCopy = rngCopy.Offset(intStepCopy, 0)
+        Set rngPaste = rngPaste.Offset(intStepPaste, 0)
+    
+    Loop
+
+End Sub
+

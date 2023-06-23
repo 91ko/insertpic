@@ -1,0 +1,50 @@
+Sub InsertPictures()
+
+    Dim picturePath As String
+    Dim pictureNumber As Integer
+    Dim pictureName As String
+    Dim pictureRow As Integer
+    Dim missingRow As Integer
+    Dim counter As Integer
+    Dim lastNumber As Integer
+    Dim ws As Worksheet
+
+    '현재 활성화된 시트 설정
+    Set ws = ActiveSheet
+
+    '폴더 선택
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        If .Show = -1 Then
+            picturePath = .SelectedItems(1)
+        Else
+            Exit Sub
+        End If
+    End With
+    
+    '마지막 넘버링 입력
+    lastNumber = InputBox("Enter the last picture number", "Picture Number")
+    
+    'd4부터 사진 삽입
+    pictureRow = 4
+    
+    '넘버링 확인
+    For pictureNumber = 1 To lastNumber
+        
+        pictureName = Dir(picturePath & "\" & Format(pictureNumber, "0000") & "*.*")
+        
+        If pictureName <> "" Then
+            '사진이 존재하는 경우 삽입
+            '사진 크기와 위치 조정
+            With ws.Shapes.AddPicture(picturePath & "\" & pictureName, msoFalse, msoCTrue, ws.Cells(pictureRow, 4).Left, ws.Cells(pictureRow, 4).Top, ws.Cells(pictureRow, 4).Width, ws.Cells(pictureRow, 4).Height)
+                .Name = "Picture" & pictureNumber
+            End With
+        Else
+            '사진이 없는 경우 "누락"이라고 적음
+            ws.Cells(pictureRow, 4).Value = "누락"
+        End If
+        
+        '다음 삽입 위치로 이동 (6칸 아래)
+        pictureRow = pictureRow + 6
+        
+    Next pictureNumber
+End Sub

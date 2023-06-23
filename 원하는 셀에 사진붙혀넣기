@@ -1,13 +1,14 @@
-Sub InsertPicture()
+Sub InsertPictures()
+
     Dim myRange As Range
     Dim myCell As Range
-    Dim myPic As Picture
     Dim PicPath As String
     Dim CellName As String
     Dim picName As String
     Dim namePart As String
     Dim firstCellHeight As Double
     Dim firstCellWidth As Double
+    Dim shp As Shape
 
     ' Ask user to select the cell to start inserting pictures
     On Error Resume Next
@@ -26,8 +27,7 @@ Sub InsertPicture()
     ' Ask user to select the picture path
     With Application.FileDialog(msoFileDialogFolderPicker)
         .Title = "Select Picture Folder"
-        .Show
-        If .SelectedItems.Count <> 0 Then
+        If .Show = -1 Then
             PicPath = .SelectedItems(1) & "\"
         Else
             MsgBox "No folder selected, exiting"
@@ -47,17 +47,15 @@ Sub InsertPicture()
             Do While picName <> ""
                 namePart = Split(Split(picName, "_")(1), ".")(0)
                 If namePart = CellName Then
-                    ' Insert picture at the current cell
-                    Set myPic = myCell.Parent.Pictures.Insert(PicPath & picName)
-                    ' Resize picture to fit inside cell
-                    With myPic.ShapeRange
+                    ' Insert picture at the current cell using Shapes.AddPicture
+                    Set shp = myCell.Parent.Shapes.AddPicture(PicPath & picName, msoFalse, msoTrue, myCell.MergeArea.Left, myCell.MergeArea.Top, myCell.MergeArea.Width, myCell.MergeArea.Height)
+                    With shp
                         .LockAspectRatio = msoFalse
+                        .Top = myCell.MergeArea.Top
+                        .Left = myCell.MergeArea.Left
                         .Width = myCell.MergeArea.Width
                         .Height = myCell.MergeArea.Height
                     End With
-                    myPic.Top = myCell.MergeArea.Top
-                    myPic.Left = myCell.MergeArea.Left
-                    myPic.Placement = xlMoveAndSize
                 End If
                 picName = Dir
             Loop

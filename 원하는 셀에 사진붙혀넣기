@@ -1,0 +1,66 @@
+Sub InsertPicture()
+    Dim myRange As Range
+    Dim myCell As Range
+    Dim myPic As Picture
+    Dim PicPath As String
+    Dim CellName As String
+    Dim picName As String
+    Dim namePart As String
+    Dim firstCellHeight As Double
+    Dim firstCellWidth As Double
+
+    ' Ask user to select the cell to start inserting pictures
+    On Error Resume Next
+    Set myRange = Application.InputBox("Select a range", Type:=8)
+    On Error GoTo 0
+
+    If myRange Is Nothing Then
+        MsgBox "No valid range selected, exiting"
+        Exit Sub
+    End If
+
+    ' Save the size of the first merged cell
+    firstCellHeight = myRange.MergeArea.Height
+    firstCellWidth = myRange.MergeArea.Width
+
+    ' Ask user to select the picture path
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        .Title = "Select Picture Folder"
+        .Show
+        If .SelectedItems.Count <> 0 Then
+            PicPath = .SelectedItems(1) & "\"
+        Else
+            MsgBox "No folder selected, exiting"
+            Exit Sub
+        End If
+    End With
+
+    ' Loop through each cell in the sheet
+    For Each myCell In ActiveSheet.UsedRange
+        ' Check if the cell is merged and matches the size of the first cell
+        If myCell.MergeCells And myCell.MergeArea.Height = firstCellHeight And myCell.MergeArea.Width = firstCellWidth Then
+            ' Cell content is the picture name
+            CellName = myCell.Text
+            ' Get the picture name from the folder
+            picName = Dir(PicPath & "*.jpg") ' Adjust the extension according to your picture files
+
+            Do While picName <> ""
+                namePart = Split(Split(picName, "_")(1), ".")(0)
+                If namePart = CellName Then
+                    ' Insert picture at the current cell
+                    Set myPic = myCell.Parent.Pictures.Insert(PicPath & picName)
+                    ' Resize picture to fit inside cell
+                    With myPic.ShapeRange
+                        .LockAspectRatio = msoFalse
+                        .Width = myCell.MergeArea.Width
+                        .Height = myCell.MergeArea.Height
+                    End With
+                    myPic.Top = myCell.MergeArea.Top
+                    myPic.Left = myCell.MergeArea.Left
+                    myPic.Placement = xlMoveAndSize
+                End If
+                picName = Dir
+            Loop
+        End If
+    Next myCell
+End Sub

@@ -1,0 +1,58 @@
+Sub CopyDataBasedOnC2Value()
+    ' 두 번째 워크시트 설정
+    Dim ws As Worksheet
+    Set ws = ThisWorkbook.Worksheets(2)
+    
+    ' 첫 번째 워크시트 설정 (붙여넣기를 위함)
+    Dim pasteWs As Worksheet
+    Set pasteWs = ThisWorkbook.Worksheets(1)
+
+    ' 복사할 셀 범위와 붙여넣을 셀 범위의 리스트 설정
+    Dim copyCells As Variant
+    Dim pasteCells As Variant
+    copyCells = Array("A", "B", "C", "J", "K", "L", "F", "M", "N", "O", "P", "Q")
+    pasteCells = Array("B", "C", "D", "E", "G", "H", "I", "J", "K", "L", "M", "N")
+
+    Dim i As Integer
+    Dim copyRow As Integer
+    Dim pasteRow As Integer
+    Dim groupStart As Integer
+    groupStart = 14
+    copyRow = 2
+    pasteRow = groupStart
+    
+    ' 복사/붙여넣기를 수행할 셀의 값이 1, 2, 3인 동안 루프
+    Do While Not IsEmpty(ws.Range("C" & copyRow).Value)
+        ' 각 셀 복사 및 붙여넣기
+        For i = 0 To UBound(copyCells)
+            ' 복사할 셀 선택
+            Dim copyCell As Range
+            Set copyCell = ws.Range(copyCells(i) & copyRow)
+            
+            ' 복사할 셀이 비어 있지 않은 경우에만 복사
+            If Not IsEmpty(copyCell.Value) Then
+                ' 붙여넣을 셀 선택
+                Dim pasteCell As Range
+                Set pasteCell = pasteWs.Range(pasteCells(i) & pasteRow)
+
+                ' 붙여넣을 셀의 서식을 텍스트로 변경
+                pasteCell.NumberFormat = "@"
+
+                ' 현재 위치에 복사한 값을 붙여넣기
+                pasteCell.Value = copyCell.Value
+            End If
+        Next i
+        
+        ' 다음 복사할 위치는 항상 다음 행
+        copyRow = copyRow + 1
+
+        ' C열의 값이 1이면, 다음 붙여넣기 위치는 17행 아래의 새로운 그룹 시작 위치
+        If ws.Range("C" & copyRow).Value = 1 Then
+            groupStart = groupStart + 17
+            pasteRow = groupStart
+        Else
+            ' 그렇지 않으면, 붙여넣기 위치는 그 다음 행
+            pasteRow = pasteRow + 1
+        End If
+    Loop
+End Sub

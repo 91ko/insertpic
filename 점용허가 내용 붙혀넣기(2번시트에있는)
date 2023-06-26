@@ -10,7 +10,7 @@ Sub CopyDataBasedOnC2Value()
     ' 복사할 셀 범위와 붙여넣을 셀 범위의 리스트 설정
     Dim copyCells As Variant
     Dim pasteCells As Variant
-    copyCells = Array("A", "B", "C", "J", "K", "L", "F", "M", "N", "O", "P", "Q")
+    copyCells = Array("A", "B", "C", "I", "J", "K", "E", "L", "M", "N", "O", "P")
     pasteCells = Array("B", "C", "D", "E", "G", "H", "I", "J", "K", "L", "M", "N")
 
     Dim i As Integer
@@ -48,7 +48,7 @@ Sub CopyDataBasedOnC2Value()
 
         ' C열의 값이 1이면, 다음 붙여넣기 위치는 17행 아래의 새로운 그룹 시작 위치
         If ws.Range("C" & copyRow).Value = 1 Then
-            groupStart = groupStart + 17
+            groupStart = groupStart + 18
             pasteRow = groupStart
         Else
             ' 그렇지 않으면, 붙여넣기 위치는 그 다음 행

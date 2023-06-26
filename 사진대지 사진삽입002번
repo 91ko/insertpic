@@ -44,7 +44,7 @@ Sub InsertPictures()
         End If
         
         '다음 삽입 위치로 이동 (6칸 아래)
-        pictureRow = pictureRow + 6
+        pictureRow = pictureRow + 4
         
     Next pictureNumber
 End Sub
